@@ -1,0 +1,17 @@
+*.swo
+*.swp
+target
+Cargo.lock
+*.orig
+*.bk
+_rust_rocksdb*
+*rlib
+tags
+
+.idea/
+out/
+*.iml
+.vscode
+rocksdb_rs_crud
+sqlite_bulk_load.db
+
