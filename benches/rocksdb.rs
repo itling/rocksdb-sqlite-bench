@@ -24,8 +24,8 @@ fn monotonic_crud(c: &mut Criterion) {
    }
   
  
-    if init_count<100000{ 
-        for _i in 0..100000{ 
+    if init_count<2000000{ 
+        for _i in 0..2000000{ 
             let cid = Cid::new_v1(Codec::Raw, Sha2_256::digest(&init_count.to_be_bytes().to_vec()));
             db.put(&cid.to_bytes().to_vec(), &bytes(1024*1024)).unwrap();
             init_count+=1;
