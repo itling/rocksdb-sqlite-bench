@@ -16,9 +16,9 @@ multihash = { default-features = false, version = "0.11" }
 
 
 
-# [[bench]]
-# name = "rocksdb"
-# harness = false
+[[bench]]
+name = "rocksdb"
+harness = false
 
 [[bench]]
 name = "sqlite"
