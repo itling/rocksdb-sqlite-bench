@@ -16,12 +16,12 @@ pub struct Record {
 
 fn sqlite_bulk_load(c: &mut Criterion){
 
-    let mut group = c.benchmark_group("/data/sqlite_monotonic_crud");
+    let mut group = c.benchmark_group("sqlite_monotonic_crud");
     
     // let temp_dir = tempfile::tempdir().unwrap();
     // let path = temp_dir.path().join("test_insert.db");
 
-    let mut conn = Connection::open("sqlite_bulk_load.db").unwrap();
+    let mut conn = Connection::open("/data/sqlite_bulk_load.db").unwrap();
 
     //create table
     conn.execute(
