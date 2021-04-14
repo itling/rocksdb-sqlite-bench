@@ -38,7 +38,7 @@ func BenchmarkGenRandom(b *testing.B) {
 func init() {
 	os.Remove("./foo.db")
 
-	db, err := sql.Open("sqlite3", "./go_sqlite_monotonic_crud.db")
+	db, err := sql.Open("sqlite3", "/data/go_sqlite_monotonic_crud.db")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,7 +95,7 @@ func init() {
 }
 
 func BenchmarkInsert(b *testing.B) {
-	db, err := sql.Open("sqlite3", "./go_sqlite_monotonic_crud.db")
+	db, err := sql.Open("sqlite3", "/data/go_sqlite_monotonic_crud.db")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -134,7 +134,7 @@ func BenchmarkInsert(b *testing.B) {
 
 func BenchmarkQuery(b *testing.B) {
 
-	db, err := sql.Open("sqlite3", "./go_sqlite_monotonic_crud.db")
+	db, err := sql.Open("sqlite3", "/data/go_sqlite_monotonic_crud.db")
 	if err != nil {
 		log.Fatal(err)
 	}

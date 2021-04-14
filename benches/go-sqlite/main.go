@@ -19,9 +19,9 @@ import (
 var count int
 
 func init() {
-	os.Remove("./go_sqlite_monotonic_crud.db")
+	os.Remove("/data/go_sqlite_monotonic_crud.db")
 
-	db, err := sql.Open("sqlite3", "./go_sqlite_monotonic_crud.db")
+	db, err := sql.Open("sqlite3", "/data/go_sqlite_monotonic_crud.db")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -101,7 +101,7 @@ func main() {
 }
 
 func testInsert() error {
-	db, err := sql.Open("sqlite3", "./go_sqlite_monotonic_crud.db")
+	db, err := sql.Open("sqlite3", "/data/go_sqlite_monotonic_crud.db")
 	if err != nil {
 		return err
 	}
@@ -139,7 +139,7 @@ func testInsert() error {
 }
 
 func testQuery() error {
-	db, err := sql.Open("sqlite3", "./go_sqlite_monotonic_crud.db")
+	db, err := sql.Open("sqlite3", "/data/go_sqlite_monotonic_crud.db")
 	if err != nil {
 		log.Fatal(err)
 	}

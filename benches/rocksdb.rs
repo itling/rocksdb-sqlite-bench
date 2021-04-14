@@ -21,7 +21,7 @@ fn monotonic_crud(c: &mut Criterion) {
         DBCompressionType::Lz4hc,
         DBCompressionType::Zstd,
     ]);
-    let db = DB::open_cf(opts, "rocksdb_rs_crud", vec![("default", cf_opts)]).unwrap();
+    let db = DB::open_cf(opts, "/data/rocksdb_rs_crud", vec![("default", cf_opts)]).unwrap();
 
     let bytes = |len| -> Vec<u8> { (0..len).map(|_| rand::random::<u8>()).collect() };
 

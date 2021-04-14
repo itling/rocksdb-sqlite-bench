@@ -19,7 +19,7 @@ fn sqlite_bulk_load(c: &mut Criterion) {
     // let temp_dir = tempfile::tempdir().unwrap();
     // let path = temp_dir.path().join("test_insert.db");
 
-    let mut conn = Connection::open("sqlite_bulk_load.db").unwrap();
+    let mut conn = Connection::open("/data/sqlite_bulk_load.db").unwrap();
 
     //create table
     conn.execute(
