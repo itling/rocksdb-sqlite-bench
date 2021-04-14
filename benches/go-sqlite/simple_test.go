@@ -17,7 +17,7 @@ import (
 var count int
 
 // 数据路径
-var dataPath string = "./go_sqlite_monotonic_crud.db"
+var dataPath string = "/data/go_sqlite_monotonic_crud.db"
 
 // 单位byte
 var dataItemSize int = 1024 * 100
