@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
+	"encoding/binary"
 	"fmt"
 	cid "github.com/ipfs/go-cid"
 	_ "github.com/mattn/go-sqlite3"
@@ -12,10 +14,21 @@ import (
 	"testing"
 )
 
-type Record struct {
-	id    int
-	key   []byte
-	value []byte
+var count int
+
+// 数据路径
+var dataPath string = "./go_sqlite_monotonic_crud.db"
+
+// 单位byte
+var dataItemSize int = 1024 * 100
+
+// 总大小=dataItemSize*totalLoopCount
+var initLoopCount int = 100
+
+func IntToByte(num int) []byte {
+	var buffer bytes.Buffer
+	_ = binary.Write(&buffer, binary.BigEndian, num)
+	return buffer.Bytes()
 }
 
 func BenchmarkCid(b *testing.B) {
@@ -30,15 +43,16 @@ func BenchmarkCid(b *testing.B) {
 func BenchmarkGenRandom(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		randValue := make([]byte, 1024*100)
+		randValue := make([]byte, dataItemSize)
 		rand.Read(randValue)
 	}
 }
 
 func init() {
-	os.Remove("./foo.db")
 
-	db, err := sql.Open("sqlite3", "/data/go_sqlite_monotonic_crud.db")
+	os.Remove(dataPath)
+
+	db, err := sql.Open("sqlite3", dataPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -77,15 +91,15 @@ func init() {
 	}
 	defer stmt.Close()
 
-	for i := 0; i < 100000; i++ {
-		randValue := make([]byte, 1024*100)
+	for i := 0; i < initLoopCount; i++ {
+		randValue := make([]byte, dataItemSize)
 		rand.Read(randValue)
-		data := IntToByte(i)
+		data := IntToByte(count)
 		hash, _ := mh.Sum(data, mh.SHA2_256, -1)
 
 		cid := cid.NewCidV1(cid.Raw, hash)
 
-		_, err = stmt.Exec(i, cid.Bytes(), randValue)
+		_, err = stmt.Exec(count, cid.Bytes(), randValue)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -95,7 +109,7 @@ func init() {
 }
 
 func BenchmarkInsert(b *testing.B) {
-	db, err := sql.Open("sqlite3", "/data/go_sqlite_monotonic_crud.db")
+	db, err := sql.Open("sqlite3", dataPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -113,7 +127,7 @@ func BenchmarkInsert(b *testing.B) {
 		}
 		defer stmt.Close()
 
-		randValue := make([]byte, 1024)
+		randValue := make([]byte, dataItemSize)
 
 		rand.Read(randValue)
 
@@ -134,7 +148,7 @@ func BenchmarkInsert(b *testing.B) {
 
 func BenchmarkQuery(b *testing.B) {
 
-	db, err := sql.Open("sqlite3", "/data/go_sqlite_monotonic_crud.db")
+	db, err := sql.Open("sqlite3", dataPath)
 	if err != nil {
 		log.Fatal(err)
 	}
