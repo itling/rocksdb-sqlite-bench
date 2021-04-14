@@ -2,7 +2,8 @@ use cid::{Cid, Codec};
 use criterion::{criterion_group, criterion_main, Criterion};
 use multihash::Sha2_256;
 use rusqlite::{params, Connection, NO_PARAMS,Error};
-use rand::{thread_rng, Rng};
+use rand::Rng;
+
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Record {
@@ -14,12 +15,22 @@ pub struct Record {
 }
 
 fn sqlite_bulk_load(c: &mut Criterion) {
+    // 数据路径
+    let data_path = "/data/sqlite_bulk_load.db";
+
+    // 单位byte
+    let data_item_size  = 1024 * 100_u32;
+
+    // 总大小=dataItemSize*totalLoopCount
+    // >1000
+    let init_loop_count  = 100;
+
     let mut group = c.benchmark_group("sqlite_monotonic_crud");
 
     // let temp_dir = tempfile::tempdir().unwrap();
     // let path = temp_dir.path().join("test_insert.db");
 
-    let mut conn = Connection::open("/data/sqlite_bulk_load.db").unwrap();
+    let mut conn = Connection::open(data_path).unwrap();
 
     //create table
     conn.execute(
@@ -58,8 +69,8 @@ fn sqlite_bulk_load(c: &mut Criterion) {
 
 
     //调整循环次数,1条数据等于1m 1000条提交一次
-    if init_count < 100000 {
-        for _ in 0..100 {
+    if init_count < init_loop_count {
+        for _ in 0..init_loop_count/1000 {
             let tx = conn.transaction().unwrap();
             for _ in 0..1000 {
                 let cid = Cid::new_v1(
@@ -69,7 +80,7 @@ fn sqlite_bulk_load(c: &mut Criterion) {
                 let record = Record {
                     id: init_count,
                     key: cid.to_bytes().to_vec(),
-                    value: bytes(1024*100),
+                    value: bytes(data_item_size),
                 };
                 tx.execute(
                     "INSERT INTO record (id,key, value) VALUES (?1, ?2,?3)",
@@ -97,7 +108,7 @@ fn sqlite_bulk_load(c: &mut Criterion) {
 
     group.bench_function("gen random", |b| {
         b.iter(|| {
-            bytes(1024 * 100);
+            bytes(data_item_size);
         })
     });
 
@@ -111,7 +122,7 @@ fn sqlite_bulk_load(c: &mut Criterion) {
             let record = Record {
                 id: insert_count,
                 key: cid.to_bytes().to_vec(),
-                value: bytes(1024*100),
+                value: bytes(data_item_size),
             };
             conn.execute(
                 "INSERT INTO record (id,key, value) VALUES (?1, ?2,?3)",
