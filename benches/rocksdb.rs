@@ -1,24 +1,29 @@
 use cid::{Cid, Codec};
 use criterion::{criterion_group, criterion_main, Criterion};
 use multihash::Sha2_256;
+use rand::{thread_rng, Rng};
+use rocksdb::{ColumnFamilyOptions, DBCompressionType, DBOptions};
 use rocksdb::{Writable, DB};
 
 fn monotonic_crud(c: &mut Criterion) {
     let mut group = c.benchmark_group("rocksdb_monotonic_crud");
 
-    let db = DB::open_default("rocksdb_rs_crud").unwrap();
+    let mut opts = DBOptions::new();
+    opts.create_if_missing(true);
 
-    let mut bytes_count = 0_u32;
-    let mut bytes = |len| -> Vec<u8> {
-        bytes_count += 1;
-        bytes_count
-            .to_be_bytes()
-            .iter()
-            .cycle()
-            .take(len)
-            .copied()
-            .collect()
-    };
+    //不压缩
+    let mut cf_opts = ColumnFamilyOptions::new();
+    cf_opts.compression_per_level(&[
+        DBCompressionType::Snappy,
+        DBCompressionType::Zlib,
+        DBCompressionType::Bz2,
+        DBCompressionType::Lz4,
+        DBCompressionType::Lz4hc,
+        DBCompressionType::Zstd,
+    ]);
+    let db = DB::open_cf(opts, "rocksdb_rs_crud", vec![("default", cf_opts)]).unwrap();
+
+    let bytes = |len| -> Vec<u8> { (0..len).map(|_| rand::random::<u8>()).collect() };
 
     let max_id = db.get(b"max_id").unwrap();
     let mut init_count = 0_u32;
@@ -36,18 +41,20 @@ fn monotonic_crud(c: &mut Criterion) {
                 Codec::Raw,
                 Sha2_256::digest(&init_count.to_be_bytes().to_vec()),
             );
-            db.put(&cid.to_bytes().to_vec(), &bytes(1024 * 1024))
+            db.put(&cid.to_bytes().to_vec(), &bytes(1024 * 100))
                 .unwrap();
             init_count += 1;
             if init_count % 1000 == 0 {
                 println!("init  record {:?}", init_count);
             }
         }
-        println!("insert max id={:?}", init_count);
+        println!("init  data ,max count={:?}", init_count);
         let _ = db
             .put(b"max_id", &init_count.to_be_bytes().to_vec())
             .unwrap();
     }
+
+  
 
     let mut insert_count = init_count;
     group.bench_function("monotonic inserts", |b| {
@@ -56,20 +63,21 @@ fn monotonic_crud(c: &mut Criterion) {
                 Codec::Raw,
                 Sha2_256::digest(&insert_count.to_be_bytes().to_vec()),
             );
-            db.put(&cid.to_bytes().to_vec(), &bytes(1024 * 1024))
+            db.put(&cid.to_bytes().to_vec(), &bytes(1024 * 100))
                 .unwrap();
             insert_count += 1;
         })
     });
-    println!("insert max id={:?}", insert_count);
+    println!("insert max count={:?}", insert_count);
     let _ = db
         .put(b"max_id", &insert_count.to_be_bytes().to_vec())
         .unwrap();
 
-    let mut get_count = insert_count;
     group.bench_function("monotonic gets", |b| {
         b.iter(|| {
-            get_count -= 1;
+            //get_count -= 1;
+            let mut rng =rand::thread_rng();
+            let get_count:u32=rng.gen_range(0..10000);
             let cid = Cid::new_v1(
                 Codec::Raw,
                 Sha2_256::digest(&get_count.to_be_bytes().to_vec()),
@@ -78,11 +86,10 @@ fn monotonic_crud(c: &mut Criterion) {
         })
     });
 
-    let mut remove_count = insert_count;
-    println!("removals max id={:?}", remove_count);
     group.bench_function("monotonic removals", |b| {
         b.iter(|| {
-            remove_count -= 1;
+            let mut rng =rand::thread_rng();
+            let remove_count:u32=rng.gen_range(0..10000);
             let cid = Cid::new_v1(
                 Codec::Raw,
                 Sha2_256::digest(&remove_count.to_be_bytes().to_vec()),

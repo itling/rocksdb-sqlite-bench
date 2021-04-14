@@ -15,4 +15,5 @@ out/
 .vscode
 rocksdb_rs_crud
 sqlite_bulk_load.db
+*/go_sqlite_monotonic_crud.db
 

@@ -13,12 +13,12 @@ rusqlite= { version = "0.24.2", features = ["bundled","chrono"], default-feature
 tempfile = "3.1.0"
 cid = { default-features = false, version = "0.5" }
 multihash = { default-features = false, version = "0.11" }
+rand=""
 
 
-
-[[bench]]
-name = "rocksdb"
-harness = false
+# [[bench]]
+# name = "rocksdb"
+# harness = false
 
 [[bench]]
 name = "sqlite"
