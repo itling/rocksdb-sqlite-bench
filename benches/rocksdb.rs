@@ -11,11 +11,11 @@ fn monotonic_crud(c: &mut Criterion) {
       let data_path = "/data/rocksdb_monotonic_crud";
 
       // 单位byte
-      let data_item_size  = 1024 * 100_u32;
+      let data_item_size  = 1024 * 1024_u32;
   
       // 总大小=dataItemSize*totalLoopCount
       // >1000
-      let init_loop_count  = 100;
+      let init_loop_count  = 100000;
 
     let mut group = c.benchmark_group("rocksdb_monotonic_crud");
 

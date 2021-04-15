@@ -19,11 +19,11 @@ fn sqlite_bulk_load(c: &mut Criterion) {
     let data_path = "/data/sqlite_bulk_load.db";
 
     // 单位byte
-    let data_item_size  = 1024 * 100_u32;
+    let data_item_size  = 1024 * 1024_u32;
 
     // 总大小=dataItemSize*totalLoopCount
     // >1000
-    let init_loop_count  = 100;
+    let init_loop_count  = 100000;
 
     let mut group = c.benchmark_group("sqlite_monotonic_crud");
 
